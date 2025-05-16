@@ -1,4 +1,4 @@
-# Beast Tracker Fork
+# Beast Tracker
 
 This is a fork of the [original Beast Tracker](https://beastracker.s3.amazonaws.com/index.html) for the Goldblum Goo and Deformed Wing quests in Race War Kingdoms. It adds quality-of-life (QoL) improvements to enhance usability and reliability.
 
