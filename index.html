@@ -117,7 +117,7 @@
                 </li>
                 <li><strong>Step 3: Wait & Repeat</strong>
                     <ul>
-                        <li>Wait 5 minutes (monitor the timer in <strong>Timer</strong> or the page title). An alert sounds when the timer resets to 0.</li>
+                        <li>Wait 5 minutes (monitor the timer in <strong>Timer</strong> or the page title). A repeating beep sounds when the timer resets to 0 (if alarm is enabled). Click anywhere on the page to stop the beep.</li>
                         <li>Track again from the same kingdom. If unsure, repeat Step 2.</li>
                     </ul>
                 </li>
@@ -130,6 +130,7 @@
                 <li><strong>Other Controls</strong>
                     <ul>
                         <li><strong>Reset:</strong> Clears all data, stops the timer, resets to 0 seconds, and enables direction buttons.</li>
+                        <li><strong>Toggle Alarm:</strong> Enables/disables the repeating beep sound that plays when the timer resets to 0. Alarm is enabled by default.</li>
                         <li><strong>Timer:</strong> Starts after setting values or moving. Works even if the tab is inactive, with time shown in the page title.</li>
                     </ul>
                 </li>
@@ -146,6 +147,7 @@
         <button onclick="reset()">Reset</button>
         <button onclick="setAllValues()">Set All Values</button>
         <button onclick="setXYLocation()">Set X / Y Location</button>
+        <button id="toggleAlarm" onclick="toggleAlarm()">Disable Alarm</button>
     </div>
 
     <div class="info">
@@ -169,6 +171,8 @@
         let max_y = 299;
         let tracks = 0;
         let recentTracks = [];
+        let alarmEnabled = true;
+        let beepInterval = null;
         const warning = new Audio("https://beastracker.s3.amazonaws.com/alert.wav");
 
         // Web Worker script for timer
@@ -208,13 +212,27 @@
         const workerURL = URL.createObjectURL(blob);
         const timerWorker = new Worker(workerURL);
 
+        // Stop beep on page click
+        function stopBeep() {
+            if (beepInterval) {
+                clearInterval(beepInterval);
+                beepInterval = null;
+                document.removeEventListener('click', stopBeep);
+            }
+        }
+
         // Handle Web Worker messages
         timerWorker.onmessage = function(e) {
             const time = e.data.time;
             document.getElementById('timer').textContent = `${time} / 300 seconds`;
             document.title = `Beast Tracker: ${300 - time}s`;
             if (e.data.alert) {
-                warning.play();
+                if (alarmEnabled) {
+                    beepInterval = setInterval(() => {
+                        warning.play();
+                    }, 1000);
+                    document.addEventListener('click', stopBeep);
+                }
                 document.getElementById("north").disabled = false;
                 document.getElementById("east").disabled = false;
                 document.getElementById("west").disabled = false;
@@ -228,6 +246,15 @@
             }
         };
 
+        // Toggle alarm
+        function toggleAlarm() {
+            alarmEnabled = !alarmEnabled;
+            document.getElementById("toggleAlarm").textContent = alarmEnabled ? "Disable Alarm" : "Enable Alarm";
+            if (!alarmEnabled && beepInterval) {
+                stopBeep();
+            }
+        }
+
         // Start the timer
         function startTimer() {
             timerWorker.postMessage({ command: 'start', time: 0 });
@@ -240,6 +267,7 @@
             document.getElementById("east").disabled = false;
             document.getElementById("west").disabled = false;
             document.getElementById("south").disabled = false;
+            stopBeep();
         }
 
         // Move function
@@ -394,6 +422,7 @@
         window.onunload = () => {
             timerWorker.terminate();
             URL.revokeObjectURL(workerURL);
+            stopBeep();
         };
     </script>
 </body>
