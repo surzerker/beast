@@ -1,43 +1,4 @@
-<script type="text/javascript">
-        var gk_isXlsx = false;
-        var gk_xlsxFileLookup = {};
-        var gk_fileData = {};
-        function filledCell(cell) {
-          return cell !== '' && cell != null;
-        }
-        function loadFileData(filename) {
-        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-            try {
-                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-                var firstSheetName = workbook.SheetNames[0];
-                var worksheet = workbook.Sheets[firstSheetName];
-
-                // Convert sheet to JSON to filter blank rows
-                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                // Filter out blank rows (rows where all cells are empty, null, or undefined)
-                var filteredData = jsonData.filter(row => row.some(filledCell));
-
-                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
-                var headerRowIndex = filteredData.findIndex((row, index) =>
-                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
-                );
-                // Fallback
-                if (headerRowIndex === -1 || headerRowIndex > 25) {
-                  headerRowIndex = 0;
-                }
-
-                // Convert filtered JSON back to CSV
-                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
-                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-                return csv;
-            } catch (e) {
-                console.error(e);
-                return "";
-            }
-        }
-        return gk_fileData[filename] || "";
-        }
-        </script><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -59,8 +20,8 @@
         button {
             margin: 5px;
             padding: 10px;
-            background-color: #3a3a3a;
-            color: #e0e0e0;
+            background-color: #2a2a2a;
+            color: #ffffff;
             border: 1px solid #555;
             border-radius: 5px;
             cursor: pointer;
@@ -68,10 +29,11 @@
         button:hover {
             background-color: #4a4a4a;
         }
-        h2 {
-            color: #4CAF50;
+        button:disabled {
+            background-color: #555;
+            cursor: not-allowed;
         }
-        h3 {
+        h2, h3 {
             color: #4CAF50;
             margin-top: 0;
         }
@@ -110,6 +72,15 @@
             background-color: #4CAF50;
             color: #1e1e1e;
         }
+        table {
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+        td {
+            border: 1px solid #555;
+            padding: 5px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -133,90 +104,101 @@
             <ul>
                 <li><strong>Step 1: Set Starting Position</strong>
                     <ul>
-                        <li>Click <strong>Set All Values</strong> to start at the map center (150,150,Surface) and begin the 5-minute timer.</li>
-                        <li>Alternatively, use <strong>Set X/Y Location</strong> to enter custom coordinates.</li>
+                        <li>Click <strong>Set All Values</strong> to enter your current X and Y locations, and the minimum and maximum X and Y boundaries (e.g., 0–299 for a full 300x300 grid). Recommended: start at Current X: 150, Current Y: 150, Min X: 0, Max X: 299, Min Y: 0, Max Y: 299. This starts the 5-minute timer.</li>
+                        <li>Alternatively, use <strong>Set X/Y Location</strong> to enter only current X and Y locations, resetting boundaries to 0–299, and start the timer if no prior moves.</li>
                     </ul>
                 </li>
                 <li><strong>Step 2: Move & Track</strong>
                     <ul>
                         <li>In-game, message the Keeper with "track" to get a direction clue (e.g., North).</li>
-                        <li>Click the corresponding button (<strong>North</strong>, <strong>East</strong>, <strong>South</strong>, <strong>West</strong>) to log the move.</li>
-                        <li>The tracker calculates a move half the distance to the map edge (e.g., 75 units from center). Update your position with <strong>Set X/Y Location</strong>.</li>
-                        <li><strong>Tracking Info</strong> shows your last move, and <strong>Recent Tracks</strong> lists up to 5 moves.</li>
+                        <li>Click the corresponding button (<strong>North</strong>, <strong>East</strong>, <strong>South</strong>, <strong>West</strong>) to move to the midpoint between your current position and the boundary in that direction (e.g., North moves Y to (Current Y + Max Y)/2). Direction buttons are disabled during the 5-minute timer.</li>
+                        <li><strong>Tracking Info</strong> shows current coordinates, boundaries, and total tracks. <strong>Recent Tracks</strong> lists moves made.</li>
                     </ul>
                 </li>
                 <li><strong>Step 3: Wait & Repeat</strong>
                     <ul>
-                        <li>Wait 5 minutes (monitor the timer in <strong>Timer</strong> or the page title).</li>
+                        <li>Wait 5 minutes (monitor the timer in <strong>Timer</strong> or the page title). An alert sounds when the timer resets to 0.</li>
                         <li>Track again from the same kingdom. If unsure, repeat Step 2.</li>
                     </ul>
                 </li>
                 <li><strong>Step 4: Handle Conflicting Results</strong>
                     <ul>
-                        <li>If clues are unclear, note your position (<strong>Map Data</strong>).</li>
-                        <li>Kill an enemy in each kingdom in an 8x8 grid around your location. Update positions with <strong>Set X/Y Location</strong>.</li>
+                        <li>If clues are unclear, note your position in <strong>Tracking Info</strong>.</li>
+                        <li>When the search area is 15x15 or smaller, <strong>Map Data</strong> shows an 8x8 grid of coordinates (or larger, based on boundaries). Kill an enemy in each kingdom listed, updating positions with <strong>Set X/Y Location</strong>.</li>
                     </ul>
                 </li>
                 <li><strong>Other Controls</strong>
                     <ul>
-                        <li><strong>Reset:</strong> Clears all data, stops the timer, and resets to 300 seconds.</li>
-                        <li><strong>Timer:</strong> Starts when you set values. Works even if the tab is inactive.</li>
+                        <li><strong>Reset:</strong> Clears all data, stops the timer, resets to 0 seconds, and enables direction buttons.</li>
+                        <li><strong>Timer:</strong> Starts after setting values or moving. Works even if the tab is inactive, with time shown in the page title.</li>
                     </ul>
                 </li>
-                <li><strong>Tips:</strong> Move systematically, log all moves, and check the timer in the tab title. The 300x300 grid means large moves (e.g., 75 units) are needed early. Be patient, as tracking can be tedious.</li>
+                <li><strong>Tips:</strong> Start at (150,150) with full boundaries (0–299) for a systematic search. Log all moves and check the timer in the tab title. Be patient, as tracking can be tedious.</li>
             </ul>
         </details>
     </div>
 
     <div class="controls">
-        <button onclick="setDirection('North')">North</button>
-        <button onclick="setDirection('East')">East</button>
-        <button onclick="setDirection('South')">South</button>
-        <button onclick="setDirection('West')">West</button>
+        <button id="north" onclick="move('north')">North</button>
+        <button id="east" onclick="move('east')">East</button>
+        <button id="south" onclick="move('south')">South</button>
+        <button id="west" onclick="move('west')">West</button>
         <button onclick="reset()">Reset</button>
         <button onclick="setAllValues()">Set All Values</button>
-        <button onclick="setXYLocation()">Set X/Y Location</button>
+        <button onclick="setXYLocation()">Set X / Y Location</button>
     </div>
 
     <div class="info">
         <p><strong>Timer:</strong> <span id="timer">0 / 300 seconds</span></p>
-        <p><strong>Tracking Info:</strong> <span id="trackingInfo">No data</span></p>
-        <p><strong>Recent Tracks:</strong> <span id="recentTracks">None</span></p>
-        <p><strong>Map Data:</strong> <span id="mapData">No data</span></p>
+        <p><strong>Tracking Info:</strong> <span id="trackingInfo"></span></p>
+        <p><strong>Recent Tracks:</strong> <span id="recentTracks"></span></p>
+        <p><strong>Map Data:</strong> <span id="mapData"></span></p>
     </div>
 
     <footer>
-        This is a fork of the <a href="https://beastracker.s3.amazonaws.com/index.html">Beast Tracker</a>, with thanks to the original author. This fork adds QoL improvements, such as working when the webpage is not in focus, and is maintained by <a href="https://github.com/surzerker/beast/">Surzerker</a>.
+        This is a fork of the <a href="https://beastracker.s3.amazonaws.com/index.html">Beast Tracker</a>, with thanks to the original author. This fork adds QoL improvements, such as working when the webpage is not in focus, and is maintained by <a href="https://github.com/surzerker">Surzerker</a>.
     </footer>
 
     <script>
-        // Web Worker script as a Blob
+        // Initialize state
+        let cur_x = 150;
+        let cur_y = 150;
+        let min_x = 0;
+        let min_y = 0;
+        let max_x = 299;
+        let max_y = 299;
+        let tracks = 0;
+        let recentTracks = [];
+        const warning = new Audio("https://beastracker.s3.amazonaws.com/alert.wav");
+
+        // Web Worker script for timer
         const workerScript = `
-            let timeLeft = 300;
+            let timeLeft = 0;
             let isRunning = false;
 
             self.onmessage = function(e) {
                 if (e.data.command === 'start') {
                     if (!isRunning) {
                         isRunning = true;
-                        timeLeft = e.data.time || 300;
+                        timeLeft = e.data.time || 0;
                         tick();
                     }
                 } else if (e.data.command === 'reset') {
-                    timeLeft = 300;
+                    timeLeft = 0;
                     isRunning = false;
                     self.postMessage({ time: timeLeft });
                 }
             };
 
             function tick() {
-                if (timeLeft > 0 && isRunning) {
-                    timeLeft--;
+                if (timeLeft < 299 && isRunning) {
+                    timeLeft++;
                     self.postMessage({ time: timeLeft });
                     setTimeout(tick, 1000);
-                } else if (timeLeft <= 0) {
+                } else if (timeLeft >= 299) {
                     isRunning = false;
                     self.postMessage({ time: 0 });
+                    self.postMessage({ alert: true });
                 }
             }
         `;
@@ -226,82 +208,187 @@
         const workerURL = URL.createObjectURL(blob);
         const timerWorker = new Worker(workerURL);
 
-        // Update UI and page title
+        // Handle Web Worker messages
         timerWorker.onmessage = function(e) {
             const time = e.data.time;
             document.getElementById('timer').textContent = `${time} / 300 seconds`;
-            document.title = `Beast Tracker: ${time}s`;
-            if (time <= 0) {
-                alert('Time is up! Reset or set new values to continue tracking.');
+            document.title = `Beast Tracker: ${300 - time}s`;
+            if (e.data.alert) {
+                warning.play();
+                document.getElementById("north").disabled = false;
+                document.getElementById("east").disabled = false;
+                document.getElementById("west").disabled = false;
+                document.getElementById("south").disabled = false;
+            }
+            if (time > 0) {
+                document.getElementById("north").disabled = true;
+                document.getElementById("east").disabled = true;
+                document.getElementById("west").disabled = true;
+                document.getElementById("south").disabled = true;
             }
         };
 
         // Start the timer
         function startTimer() {
-            timerWorker.postMessage({ command: 'start', time: 300 });
+            timerWorker.postMessage({ command: 'start', time: 0 });
         }
 
         // Reset the timer
         function resetTimer() {
             timerWorker.postMessage({ command: 'reset' });
-            document.getElementById('timer').textContent = `0 / 300 seconds`;
-            document.title = `Beast Tracker: 300s`;
+            document.getElementById("north").disabled = false;
+            document.getElementById("east").disabled = false;
+            document.getElementById("west").disabled = false;
+            document.getElementById("south").disabled = false;
         }
 
-        // Track movement history and position
-        let recentTracks = [];
-        let currentPosition = { x: null, y: null, z: 'Surface' };
+        // Move function
+        function move(direction) {
+            switch (direction.toLowerCase()) {
+                case "north":
+                    min_y = cur_y;
+                    cur_y = Math.floor((cur_y + max_y) / 2);
+                    recentTracks.push("North");
+                    break;
+                case "east":
+                    min_x = cur_x;
+                    cur_x = Math.floor((cur_x + max_x) / 2);
+                    recentTracks.push("East");
+                    break;
+                case "south":
+                    max_y = cur_y;
+                    cur_y = Math.floor((cur_y + min_y) / 2);
+                    recentTracks.push("South");
+                    break;
+                case "west":
+                    max_x = cur_x;
+                    cur_x = Math.floor((cur_x + min_x) / 2);
+                    recentTracks.push("West");
+                    break;
+                default:
+                    console.log("Invalid direction");
+                    return;
+            }
+            tracks++;
+            while (recentTracks.length > 5) recentTracks.shift();
+            document.getElementById("recentTracks").innerHTML = recentTracks.join("<br>") || "";
+            startTimer();
+            display();
+        }
 
-        function setDirection(direction) {
-            if (currentPosition.x === null || currentPosition.y === null) {
-                alert('Please set your starting position using Set All Values or Set X/Y Location.');
+        // Display tracking info
+        function display() {
+            document.getElementById('trackingInfo').innerHTML = `
+                <table>
+                    <tr><td>Min X: ${min_x}</td><td>Max X: ${max_x}</td></tr>
+                    <tr><td>Min Y: ${min_y}</td><td>Max Y: ${max_y}</td></tr>
+                    <tr><td>Current X: ${cur_x}</td><td>Current Y: ${cur_y}</td></tr>
+                    <tr><td colspan=2>Total Tracks: ${tracks}</td></tr>
+                </table>`;
+            document.getElementById('mapData').innerHTML = "";
+            if ((max_x - min_x) <= 15 || (max_y - min_y) <= 15) {
+                grid();
+            }
+        }
+
+        // Generate grid
+        function grid() {
+            let table_html = "<table>";
+            let x = max_x - min_x;
+            let y = max_y - min_y;
+            for (let i = 0; i <= y; i++) {
+                table_html += "<tr>";
+                for (let ii = 0; ii <= x; ii++) {
+                    table_html += `<td>${min_x + ii},Sur,${max_y - i}</td>`;
+                }
+                table_html += "</tr>";
+            }
+            table_html += "</table>";
+            document.getElementById('mapData').innerHTML = table_html;
+        }
+
+        // Reset function
+        function reset() {
+            cur_x = 150;
+            cur_y = 150;
+            min_x = 0;
+            min_y = 0;
+            max_x = 299;
+            max_y = 299;
+            tracks = 0;
+            recentTracks = [];
+            document.getElementById("recentTracks").innerHTML = "";
+            document.getElementById("mapData").innerHTML = "";
+            document.getElementById("trackingInfo").innerHTML = "";
+            display();
+            resetTimer();
+        }
+
+        // Set all values
+        function setAllValues() {
+            const inputs = [
+                { name: "Current X Location", value: cur_x },
+                { name: "Current Y Location", value: cur_y },
+                { name: "Max X Location", value: max_x },
+                { name: "Min X Location", value: min_x },
+                { name: "Max Y Location", value: max_y },
+                { name: "Min Y Location", value: min_y }
+            ];
+            let valid = true;
+            const results = inputs.map(input => {
+                const value = prompt(`${input.name}:`, input.value);
+                const num = parseInt(value, 10);
+                if (isNaN(num) || num < 0 || num > 299) {
+                    valid = false;
+                    return null;
+                }
+                return num;
+            });
+            if (!valid) {
+                alert("Please enter valid numbers between 0 and 299.");
                 return;
             }
-            document.getElementById('trackingInfo').textContent = `Moved ${direction} (half distance to edge)`;
-            recentTracks.push(direction);
-            if (recentTracks.length > 5) recentTracks.shift();
-            document.getElementById('recentTracks').textContent = recentTracks.join(', ') || 'None';
-            // Suggest new position (half distance to edge)
-            let distance = 75; // Half of 150 (center to edge)
-            let newX = currentPosition.x;
-            let newY = currentPosition.y;
-            if (direction === 'North') newY += distance;
-            else if (direction === 'South') newY -= distance;
-            else if (direction === 'East') newX += distance;
-            else if (direction === 'West') newX -= distance;
-            document.getElementById('mapData').textContent = `Suggested: (${newX}, ${newY}, Surface)`;
-        }
-
-        function reset() {
-            resetTimer();
+            [cur_x, cur_y, max_x, min_x, max_y, min_y] = results;
+            if (cur_x < min_x || cur_x > max_x || cur_y < min_y || cur_y > max_y) {
+                alert("Current X/Y must be within Min/Max boundaries.");
+                return;
+            }
+            tracks = 0;
             recentTracks = [];
-            currentPosition = { x: null, y: null, z: 'Surface' };
-            document.getElementById('trackingInfo').textContent = 'No data';
-            document.getElementById('recentTracks').textContent = 'None';
-            document.getElementById('mapData').textContent = 'No data';
-        }
-
-        function setAllValues() {
-            currentPosition = { x: 150, y: 150, z: 'Surface' };
-            document.getElementById('mapData').textContent = `Position: (150, 150, Surface)`;
-            document.getElementById('trackingInfo').textContent = 'Starting at map center';
+            document.getElementById("recentTracks").innerHTML = "";
+            document.getElementById("mapData").innerHTML = "";
+            display();
             startTimer();
         }
 
+        // Set X/Y location
         function setXYLocation() {
-            const x = prompt('Enter X coordinate (1-300):', currentPosition.x || '150');
-            const y = prompt('Enter Y coordinate (1-300):', currentPosition.y || '150');
-            if (x && y && !isNaN(x) && !isNaN(y) && x >= 1 && x <= 300 && y >= 1 && y <= 300) {
-                currentPosition.x = parseInt(x);
-                currentPosition.y = parseInt(y);
-                document.getElementById('mapData').textContent = `Position: (${x}, ${y}, Surface)`;
-                if (!recentTracks.length) {
-                    startTimer();
-                }
-            } else {
-                alert('Please enter valid coordinates (1-300).');
+            const x = prompt("Current X Location:", cur_x);
+            const y = prompt("Current Y Location:", cur_y);
+            const numX = parseInt(x, 10);
+            const numY = parseInt(y, 10);
+            if (isNaN(numX) || isNaN(numY) || numX < 0 || numX > 299 || numY < 0 || numY > 299) {
+                alert("Please enter valid coordinates (0-299).");
+                return;
+            }
+            cur_x = numX;
+            cur_y = numY;
+            max_x = 299;
+            min_x = 0;
+            max_y = 299;
+            min_y = 0;
+            tracks = 0;
+            recentTracks = [];
+            document.getElementById("recentTracks").innerHTML = "";
+            document.getElementById("mapData").innerHTML = "";
+            display();
+            if (recentTracks.length === 0) {
+                startTimer();
             }
         }
+
+        // Initialize display
+        display();
 
         // Cleanup worker on page unload
         window.onunload = () => {
