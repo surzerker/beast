@@ -1,6 +1,6 @@
 # Beast Tracker Fork
 
-This is a fork of the [original Beast Tracker](https://beastracker.s3.amazonaws.com/index.html) for the Goldblum Goo and Deformed Wing quests in Race War Kingdoms. It adds quality-of-life (QoL) improvements to enhance usability and reliability, maintained by [Surzerker](https://github.com/surzerker).
+This is a fork of the [original Beast Tracker](https://beastracker.s3.amazonaws.com/index.html) for the Goldblum Goo and Deformed Wing quests in Race War Kingdoms. It adds quality-of-life (QoL) improvements to enhance usability and reliability.
 
 ## Credits
 
@@ -8,7 +8,6 @@ This is a fork of the [original Beast Tracker](https://beastracker.s3.amazonaws.
 - **JimCav.com**: For providing detailed information about the quests, which informed the tracker’s instructions and strategies.
 - **Alex (Cagedangel)**: For identifying the need for a Web Worker to ensure the timer works when the tab is out of focus.
 - **Sebs (Niizandar)**: For the original request that inspired this fork’s development.
-- **Maintainer**: [Surzerker](https://github.com/surzerker), for implementing and maintaining the QoL improvements.
 
 ## Purpose
 
@@ -60,7 +59,7 @@ This tool assists players in completing the Goldblum Goo (Nightmare Fly) and Def
 
 ## How to Use
 
-1. Visit the [GitHub Pages site](https://surzerker.github.io/beast-tracker) (replace with your actual URL after enabling GitHub Pages).
+1. Visit the [GitHub Pages site](https://surzerker.github.io/beast/).
 2. Expand the "Quest Overview" or "How to Use the Tracker" sections for guidance.
 3. Click **Set All Values** to start at (150,150,Surface) or **Set X/Y Location** for a custom position, which starts the 5-minute timer.
 4. Message the Shrine Keeper in-game with "track" to get a direction, then click the corresponding direction button (e.g., North) to log the move.
@@ -68,15 +67,6 @@ This tool assists players in completing the Goldblum Goo (Nightmare Fly) and Def
 6. Monitor the timer in the UI or page title, waiting 5 minutes before tracking again.
 7. Use **Reset** to clear data and restart.
 8. For conflicting clues, note your position and kill enemies in an 8x8 grid, updating coordinates as needed.
-
-## Setup with GitHub Pages
-
-To host this tracker:
-1. Ensure `index.html` is in the repository’s root.
-2. Go to **Settings** > **Pages** in your repository.
-3. Set **Source** to **Deploy from a branch**, select `main` and `/ (root)`, then **Save**.
-4. Wait 1–5 minutes, then visit `https://surzerker.github.io/beast-tracker` (adjust for your repository name).
-5. The site is now publicly accessible.
 
 ## Contributing
 
