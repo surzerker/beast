@@ -1,0 +1,313 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beast Tracker: 300s</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #1e1e1e;
+            color: #e0e0e0;
+        }
+        .controls, .info, .instructions {
+            margin-bottom: 20px;
+            background-color: #2a2a2a;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        button {
+            margin: 5px;
+            padding: 10px;
+            background-color: #3a3a3a;
+            color: #e0e0e0;
+            border: 1px solid #555;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #4a4a4a;
+        }
+        h2 {
+            color: #4CAF50;
+        }
+        h3 {
+            color: #4CAF50;
+            margin-top: 0;
+        }
+        a {
+            color: #4CAF50;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        footer {
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #a0a0a0;
+            text-align: center;
+        }
+        ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        details {
+            margin-bottom: 10px;
+        }
+        summary {
+            cursor: pointer;
+            padding: 10px;
+            background-color: #3a3a3a;
+            border-radius: 5px;
+            color: #e0e0e0;
+            font-weight: bold;
+        }
+        summary:hover {
+            background-color: #4a4a4a;
+        }
+        details[open] summary {
+            background-color: #4CAF50;
+            color: #1e1e1e;
+        }
+    </style>
+</head>
+<body>
+    <div class="instructions">
+        <h2>Beast Tracker: Goldblum Goo & Deformed Wing Quests</h2>
+        <p>This tool helps track the Goldblum Goo (Nightmare Fly) and Deformed Wing (Dragonling Zombie) quests in Race War Kingdoms. Expand the sections below for details, using the <a href="https://www.reddit.com/r/a:t5_3k1hf/comments/6ndq4z/card_quests_new_surface_beasts/">TL;DR strategies</a>.</p>
+        <details>
+            <summary>Show Quest Overview</summary>
+            <h3>Quest Overview</h3>
+            <ul>
+                <li><strong>Cost:</strong> 5,000+ ash or 999 runes + minor ash per quest.</li>
+                <li><strong>Obtain Item:</strong> Kill a Nightmare Fly for Goldblum Goo or a Dragonling Zombie for Deformed Wing.</li>
+                <li><strong>Trade:</strong> Give the item to the Shrine Keeper in your kingdom (with 999 runes if paying that way) to get a clue about the target kingdom.</li>
+                <li><strong>Track:</strong> Every 5 minutes, message the Keeper with "track" (costs 10 ash) for a clue on the target kingdom’s direction relative to your location.</li>
+                <li><strong>Goal:</strong> Find the target kingdom and kill any enemy to complete the quest. Gain a chance to not consume black (Goo) or red (Wing) sleeved cards when triggered. Quests are repeatable, and bonuses stack (check /stats).</li>
+            </ul>
+        </details>
+        <details>
+            <summary>Show How to Use the Tracker</summary>
+            <h3>How to Use the Tracker</h3>
+            <ul>
+                <li><strong>Step 1: Set Starting Position</strong>
+                    <ul>
+                        <li>Click <strong>Set All Values</strong> to start at the map center (150,150,Surface) and begin the 5-minute timer.</li>
+                        <li>Alternatively, use <strong>Set X/Y Location</strong> to enter custom coordinates.</li>
+                    </ul>
+                </li>
+                <li><strong>Step 2: Move & Track</strong>
+                    <ul>
+                        <li>In-game, message the Keeper with "track" to get a direction clue (e.g., North).</li>
+                        <li>Click the corresponding button (<strong>North</strong>, <strong>East</strong>, <strong>South</strong>, <strong>West</strong>) to log the move.</li>
+                        <li>The tracker calculates a move half the distance to the map edge (e.g., 75 units from center). Update your position with <strong>Set X/Y Location</strong>.</li>
+                        <li><strong>Tracking Info</strong> shows your last move, and <strong>Recent Tracks</strong> lists up to 5 moves.</li>
+                    </ul>
+                </li>
+                <li><strong>Step 3: Wait & Repeat</strong>
+                    <ul>
+                        <li>Wait 5 minutes (monitor the timer in <strong>Timer</strong> or the page title).</li>
+                        <li>Track again from the same kingdom. If unsure, repeat Step 2.</li>
+                    </ul>
+                </li>
+                <li><strong>Step 4: Handle Conflicting Results</strong>
+                    <ul>
+                        <li>If clues are unclear, note your position (<strong>Map Data</strong>).</li>
+                        <li>Kill an enemy in each kingdom in an 8x8 grid around your location. Update positions with <strong>Set X/Y Location</strong>.</li>
+                    </ul>
+                </li>
+                <li><strong>Other Controls</strong>
+                    <ul>
+                        <li><strong>Reset:</strong> Clears all data, stops the timer, and resets to 300 seconds.</li>
+                        <li><strong>Timer:</strong> Starts when you set values. Works even if the tab is inactive.</li>
+                    </ul>
+                </li>
+                <li><strong>Tips:</strong> Move systematically, log all moves, and check the timer in the tab title. The 300x300 grid means large moves (e.g., 75 units) are needed early. Be patient, as tracking can be tedious.</li>
+            </ul>
+        </details>
+    </div>
+
+    <div class="controls">
+        <button onclick="setDirection('North')">North</button>
+        <button onclick="setDirection('East')">East</button>
+        <button onclick="setDirection('South')">South</button>
+        <button onclick="setDirection('West')">West</button>
+        <button onclick="reset()">Reset</button>
+        <button onclick="setAllValues()">Set All Values</button>
+        <button onclick="setXYLocation()">Set X/Y Location</button>
+    </div>
+
+    <div class="info">
+        <p><strong>Timer:</strong> <span id="timer">0 / 300 seconds</span></p>
+        <p><strong>Tracking Info:</strong> <span id="trackingInfo">No data</span></p>
+        <p><strong>Recent Tracks:</strong> <span id="recentTracks">None</span></p>
+        <p><strong>Map Data:</strong> <span id="mapData">No data</span></p>
+    </div>
+
+    <footer>
+        This is a fork of the <a href="https://beastracker.s3.amazonaws.com/index.html">Beast Tracker</a>, with thanks to the original author. This fork adds QoL improvements, such as working when the webpage is not in focus, and is maintained by <a href="https://github.com/surzerker">Surzerker</a>.
+    </footer>
+
+    <script>
+        // Web Worker script as a Blob
+        const workerScript = `
+            let timeLeft = 300;
+            let isRunning = false;
+
+            self.onmessage = function(e) {
+                if (e.data.command === 'start') {
+                    if (!isRunning) {
+                        isRunning = true;
+                        timeLeft = e.data.time || 300;
+                        tick();
+                    }
+                } else if (e.data.command === 'reset') {
+                    timeLeft = 300;
+                    isRunning = false;
+                    self.postMessage({ time: timeLeft });
+                }
+            };
+
+            function tick() {
+                if (timeLeft > 0 && isRunning) {
+                    timeLeft--;
+                    self.postMessage({ time: timeLeft });
+                    setTimeout(tick, 1000);
+                } else if (timeLeft <= 0) {
+                    isRunning = false;
+                    self.postMessage({ time: 0 });
+                }
+            }
+        `;
+
+        // Create Web Worker
+        const blob = new Blob([workerScript], { type: 'application/javascript' });
+        const workerURL = URL.createObjectURL(blob);
+        const timerWorker = new Worker(workerURL);
+
+        // Update UI and page title
+        timerWorker.onmessage = function(e) {
+            const time = e.data.time;
+            document.getElementById('timer').textContent = `${time} / 300 seconds`;
+            document.title = `Beast Tracker: ${time}s`;
+            if (time <= 0) {
+                alert('Time is up! Reset or set new values to continue tracking.');
+            }
+        };
+
+        // Start the timer
+        function startTimer() {
+            timerWorker.postMessage({ command: 'start', time: 300 });
+        }
+
+        // Reset the timer
+        function resetTimer() {
+            timerWorker.postMessage({ command: 'reset' });
+            document.getElementById('timer').textContent = `0 / 300 seconds`;
+            document.title = `Beast Tracker: 300s`;
+        }
+
+        // Track movement history and position
+        let recentTracks = [];
+        let currentPosition = { x: null, y: null, z: 'Surface' };
+
+        function setDirection(direction) {
+            if (currentPosition.x === null || currentPosition.y === null) {
+                alert('Please set your starting position using Set All Values or Set X/Y Location.');
+                return;
+            }
+            document.getElementById('trackingInfo').textContent = `Moved ${direction} (half distance to edge)`;
+            recentTracks.push(direction);
+            if (recentTracks.length > 5) recentTracks.shift();
+            document.getElementById('recentTracks').textContent = recentTracks.join(', ') || 'None';
+            // Suggest new position (half distance to edge)
+            let distance = 75; // Half of 150 (center to edge)
+            let newX = currentPosition.x;
+            let newY = currentPosition.y;
+            if (direction === 'North') newY += distance;
+            else if (direction === 'South') newY -= distance;
+            else if (direction === 'East') newX += distance;
+            else if (direction === 'West') newX -= distance;
+            document.getElementById('mapData').textContent = `Suggested: (${newX}, ${newY}, Surface)`;
+        }
+
+        function reset() {
+            resetTimer();
+            recentTracks = [];
+            currentPosition = { x: null, y: null, z: 'Surface' };
+            document.getElementById('trackingInfo').textContent = 'No data';
+            document.getElementById('recentTracks').textContent = 'None';
+            document.getElementById('mapData').textContent = 'No data';
+        }
+
+        function setAllValues() {
+            currentPosition = { x: 150, y: 150, z: 'Surface' };
+            document.getElementById('mapData').textContent = `Position: (150, 150, Surface)`;
+            document.getElementById('trackingInfo').textContent = 'Starting at map center';
+            startTimer();
+        }
+
+        function setXYLocation() {
+            const x = prompt('Enter X coordinate (1-300):', currentPosition.x || '150');
+            const y = prompt('Enter Y coordinate (1-300):', currentPosition.y || '150');
+            if (x && y && !isNaN(x) && !isNaN(y) && x >= 1 && x <= 300 && y >= 1 && y <= 300) {
+                currentPosition.x = parseInt(x);
+                currentPosition.y = parseInt(y);
+                document.getElementById('mapData').textContent = `Position: (${x}, ${y}, Surface)`;
+                if (!recentTracks.length) {
+                    startTimer();
+                }
+            } else {
+                alert('Please enter valid coordinates (1-300).');
+            }
+        }
+
+        // Cleanup worker on page unload
+        window.onunload = () => {
+            timerWorker.terminate();
+            URL.revokeObjectURL(workerURL);
+        };
+    </script>
+</body>
+</html>
