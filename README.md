@@ -5,7 +5,7 @@ This is a fork of the [original Beast Tracker](https://beastracker.s3.amazonaws.
 ## Credits
 
 - **Original Author**: Anubis (assumed), for creating the original Beast Tracker.
-- **JimCav.com**: For providing detailed information about the quests, which informed the tracker’s instructions and strategies.
+- **Jimcav**: For providing detailed information about the quests, which informed the tracker’s instructions and strategies.
 - **Alex (Cagedangel)**: For identifying the need for a Web Worker to ensure the timer works when the tab is out of focus.
 - **Sebs (Niizandar)**: For the original request that inspired this fork’s development.
 
