@@ -39,7 +39,7 @@ This tool assists players in completing the Goldblum Goo (Nightmare Fly) and Def
   - **Quest Overview**: Explains the Goldblum Goo and Deformed Wing quests, including costs (5,000+ ash or 999 runes), item acquisition, trading, tracking, and rewards (non-consumed card chances).
   - **How to Use the Tracker**: Guides users through the TL;DR strategies (start at (150,150,Surface), move 75 units, wait 5 minutes, handle conflicts with an 8x8 grid) and tool usage (setting positions, logging moves, monitoring timer).
   - Sections are toggled via clear "Show Quest Overview" and "Show How to Use the Tracker" buttons.
-- **Benefit**: Keeps the interface clean for experienced users while providing accessible, detailed guidance for newcomers, with information sourced from [JimCav.com](https://jimcav.com) and the [Reddit post](https://www.reddit.com/r/a:t5_3k1hf/comments/6ndq4z/card_quests_new_surface_beasts/).
+- **Benefit**: Keeps the interface clean for experienced users while providing accessible, detailed guidance for newcomers, with information sourced from [Jimcav.com](https://jimcav.com) and the [Reddit post](https://www.reddit.com/r/a:t5_3k1hf/comments/6ndq4z/card_quests_new_surface_beasts/).
 
 ### 4. Enhanced Instructions and Quest Integration
 - **Improvement**: Integrated specific instructions for the quests, replacing generic references with tailored guidance based on provided strategies.
